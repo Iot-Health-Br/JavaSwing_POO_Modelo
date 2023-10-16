@@ -25,7 +25,7 @@ public class PessoaDao implements IPessoaDao {
     private static final String TABELA_PESSOAS = "TabelaDePessoas";
     private static final String COLUNA_ID = "id";
     private static final String COLUNA_NOME = "nome";
-
+    private static final String COLUNA_FOTO = "foto";
     public PessoaDao() {
         criarTabela();
     }
@@ -33,15 +33,16 @@ public class PessoaDao implements IPessoaDao {
     private void criarTabela() {
         try (Connection conexao = DatabaseConnection.getConnection();
              Statement statement = conexao.createStatement()) {
-             String query = String.format("CREATE TABLE IF NOT EXISTS %s (%s SERIAL PRIMARY KEY, %s VARCHAR(255)UNIQUE)",
-                    TABELA_PESSOAS, COLUNA_ID, COLUNA_NOME);
-            statement.executeUpdate(query);} 
+             String query = String.format("CREATE TABLE IF NOT EXISTS %s (%s SERIAL PRIMARY KEY, %s VARCHAR(255)UNIQUE, %s BYTEA not null)",
+             TABELA_PESSOAS, COLUNA_ID, COLUNA_NOME, COLUNA_FOTO);
+             statement.executeUpdate(query);}
         
         catch (SQLException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Erro ao criar tabela de Pessoa");}}
+            JOptionPane.showMessageDialog(null, "Erro ao criar tabela de Pessoa");}
+    }
 
-    public PessoaModelo adicionarPessoa(String nome) {
+    public PessoaModelo adicionarPessoa(String nome, byte[] imagemBytes) {
         
         try (Connection conexao = DatabaseConnection.getConnection();
             // Verificar se a PESSOA já está cadastrada
@@ -50,7 +51,7 @@ public class PessoaDao implements IPessoaDao {
                  
             // Inserir a PESSOA no banco de dados
             PreparedStatement insercaoStatement = conexao.prepareStatement(
-            String.format("INSERT INTO %s (%s) VALUES (?) ", TABELA_PESSOAS, COLUNA_NOME),
+            String.format("INSERT INTO %s (%s,%s) VALUES (?,?) ", TABELA_PESSOAS, COLUNA_NOME, COLUNA_FOTO),
             Statement.RETURN_GENERATED_KEYS)) {
 
             // Verificar se a PESSOA já está cadastrada
@@ -63,6 +64,7 @@ public class PessoaDao implements IPessoaDao {
         
                 // Inserir a PESSOA no banco de dados
                 insercaoStatement.setString(1, nome );
+                insercaoStatement.setBytes(2, imagemBytes );
                 int rowsAffected = insercaoStatement.executeUpdate();
 
                 if (rowsAffected == 0) {
@@ -71,7 +73,7 @@ public class PessoaDao implements IPessoaDao {
             try (ResultSet generatedKeys = insercaoStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     int id = generatedKeys.getInt(1);
-                    return new PessoaModelo(id, nome);} 
+                    return new PessoaModelo(id, nome, imagemBytes);}
                 else {
                     return null;}}
         } 
@@ -119,10 +121,11 @@ public class PessoaDao implements IPessoaDao {
             while (resultSet.next()) {
                 int id = resultSet.getInt(COLUNA_ID);
                 String nome = resultSet.getString(COLUNA_NOME);
-                PessoaModelo marca = new PessoaModelo(id, nome);
+                byte[] imagemBytes = resultSet.getBytes(COLUNA_FOTO);
+                PessoaModelo marca = new PessoaModelo(id, nome, imagemBytes);
                 pessoas.add(marca);}
             
-            resultSet.close();} 
+        resultSet.close();}
         
         catch (SQLException e) {
             e.printStackTrace();}

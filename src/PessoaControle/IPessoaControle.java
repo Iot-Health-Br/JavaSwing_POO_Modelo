@@ -13,11 +13,11 @@ import TelaPessoa.PessoaTela;
 // Classe Principal da Interface
 public interface IPessoaControle {
     //Metodo Adicionar Pessoa, faz adiçao da Varival String nome no banco de dados
-    void adicionarPessoa(String nome);
+    void adicionarPessoa(String nome, byte[] imagemBytes);
     //Metodo Atualizar Pessoa
     void atualizarPessoa(int id, String novoNome);
     //Metodo Remover Pessoa, faz a pesquisa pelo id
     void removerPessoa(int id);
     //Metodo Buscar Pessoa, faz a busca pela String Nome
-    PessoaModelo buscarPessoa(String nome);
+    PessoaModelo buscarPessoa(String nome, byte[] imagemBytes);
 }

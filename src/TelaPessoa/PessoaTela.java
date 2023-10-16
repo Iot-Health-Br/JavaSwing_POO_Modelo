@@ -4,32 +4,23 @@
  */
 package TelaPessoa;
 
-import ConexaoBancoDeDados.DatabaseConnection;
 import PessoaControle.IPessoaControle;
 import PessoaControle.PessoaControle;
 import PessoaModelo.PessoaModelo;
 import PessoaPersistencia.IPessoaDao;
 import PessoaPersistencia.PessoaDao;
-import TelaPessoa.PessoaTela;
-import Renderizador.RendererFoto;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.io.FileInputStream;
 import java.util.List;
-import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author Igor
- */
-public class PessoaTela extends javax.swing.JFrame {
 
-    /**
-     * Creates new form PessoTela
-     */
+public class PessoaTela extends javax.swing.JFrame {
+    // Armazenamento do binario da imagem.
+    byte[] imagemBytes = null;
+
     public PessoaTela() {
         initComponents();       
         
@@ -40,18 +31,19 @@ public class PessoaTela extends javax.swing.JFrame {
         Txt_Nome.setText("");
         
         // Inicia a Tabela tabelaMarcas atualizada.
-        IPessoaDao marcaDao = new PessoaDao();
+        IPessoaDao pessoaDao = new PessoaDao();
         DefaultTableModel tableModel = (DefaultTableModel) TabelaPessoa.getModel();
+
 
         // Limpar dados existentes na tabela
         tableModel.setRowCount(0);
 
         // Obter lista de marcas do banco de dados
-        List<PessoaModelo> marcas = marcaDao.listarPessoa();
+        List<PessoaModelo> pessoas = pessoaDao.listarPessoa();
 
         // Preencher tabela com os dados das marcas
-        for (PessoaModelo marca : marcas) {
-            Object[] rowData = {marca.getId(), marca.getNome()};
+        for (PessoaModelo pessoa : pessoas) {
+            Object[] rowData = {pessoa.getId(), pessoa.getNome(), pessoa.getImagemBytes()};
             tableModel.addRow(rowData);
         }
     }
@@ -246,29 +238,73 @@ public class PessoaTela extends javax.swing.JFrame {
             String pessoaSelecionada = (String) TabelaPessoa.getValueAt(selectedRow, 1);
             Txt_Nome.setText(pessoaSelecionada);
         }
+        /*
+        Ao selecionar a linha faz a consulta do id no banco de dados e retorna com a imagem na label.
+         */
+
+    }//GEN-LAST:event_TabelaPessoaMouseClicked
+
+    private void Btn_AddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_AddActionPerformed
         try {
-            this.Txt_Nome.setText((String) this.TabelaPessoa.getValueAt(TabelaPessoa.getSelectedRow(), 1));
+            JFileChooser fc = new JFileChooser();
+            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            // Abre no diretorio especifico
+            fc.setCurrentDirectory(new File ("./src/PessoasFotos"));
+
+            // Abre a janela do diretorio do arquivo
+            fc.showOpenDialog(this);
+            // Salva o arquivo selecionado em um arquivo novo
+            File arquivo = fc.getSelectedFile();
+
+            // Salva o binario da imagem e fecha o InputStream
+            try (FileInputStream inputStream = new FileInputStream(arquivo)) {
+                imagemBytes = inputStream.readAllBytes();}
+
+            // Salva o Caminho do diretorio
+            String nomeDoArquivo = arquivo.getPath();
+
+            ImageIcon iconLogo = new ImageIcon(nomeDoArquivo);
+            iconLogo.setImage(iconLogo.getImage().getScaledInstance(
+            Panel_Logo.getWidth(),Panel_Logo.getHeight(),1));
+            Panel_Logo.setIcon(iconLogo);
         }
         catch (Exception erro) {
             JOptionPane.showMessageDialog(this, erro);
         }
-    }//GEN-LAST:event_TabelaPessoaMouseClicked
-
-    private void Btn_AddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_AddActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_Btn_AddActionPerformed
 
     private void Btn_SalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_SalvarActionPerformed
          if(!Txt_Nome.getText().equals("")){
             String nomePessoa = Txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomeMarca seja o campo de entrada para o nome da marca
-
             IPessoaDao pessoaDao = new PessoaDao();
-            IPessoaControle marcaControle = new PessoaControle(pessoaDao, (DefaultTableModel) TabelaPessoa.getModel());
-            marcaControle.adicionarPessoa(nomePessoa);
-        }
+            IPessoaControle pessoaControle = new PessoaControle(pessoaDao, (DefaultTableModel) TabelaPessoa.getModel());
+            pessoaControle.adicionarPessoa(nomePessoa,imagemBytes);
+         }
         else{
-            JOptionPane.showMessageDialog(null, "Campos vazios !");
-        }
+            JOptionPane.showMessageDialog(null, "Campos vazios !");}
+
+
+        // Testar e excluir -- Código bem estruturado abaixo
+        /*JFileChooser fileChooser = new JFileChooser("./src/PessoasFotos");
+        int escolha = fileChooser.showOpenDialog(null);
+
+        if (escolha == JFileChooser.APPROVE_OPTION) {
+            File arquivoImagem = fileChooser.getSelectedFile();
+
+            try (FileInputStream inputStream = new FileInputStream(arquivoImagem)) {
+                byte[] imagemBytes = inputStream.readAllBytes();
+                String nomePessoa = Txt_Nome.getText().toUpperCase();
+
+                IPessoaDao pessoaDao = new PessoaDao();
+                IPessoaControle pessoaControle = new PessoaControle(pessoaDao, (DefaultTableModel) TabelaPessoa.getModel());
+                pessoaControle.adicionarPessoa(nomePessoa, imagemBytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            JOptionPane.showMessageDialog(null, "Nenhuma imagem selecionada.");
+        }*/
     }//GEN-LAST:event_Btn_SalvarActionPerformed
 
     private void Btn_AlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_AlterarActionPerformed

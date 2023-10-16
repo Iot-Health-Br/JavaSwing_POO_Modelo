@@ -13,7 +13,7 @@ import TelaPessoa.PessoaTela;
 import java.util.List;
 
 public interface IPessoaDao {
-    PessoaModelo adicionarPessoa(String nome);
+    PessoaModelo adicionarPessoa(String nome, byte[] imagemBytes);
     boolean atualizarPessoa(int id, String novoNome);
     boolean removerPessoa(int id);
     List<PessoaModelo> listarPessoa();

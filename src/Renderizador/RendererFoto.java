@@ -10,10 +10,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-/**
- *
- * @author dhion
- */
 public class RendererFoto extends DefaultTableCellRenderer{
     
 JLabel icone = new JLabel();
