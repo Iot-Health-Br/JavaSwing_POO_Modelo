@@ -10,11 +10,11 @@ import PessoaModelo.PessoaModelo;
 import PessoaPersistencia.IPessoaDao;
 import PessoaPersistencia.PessoaDao;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 
 public class PessoaTela extends javax.swing.JFrame {
@@ -30,7 +30,7 @@ public class PessoaTela extends javax.swing.JFrame {
         // SETA VAZIO NOS CAMPOS DE TEXTO
         Txt_Nome.setText("");
         
-        // Inicia a Tabela tabelaMarcas atualizada.
+        // Inicia a Tabela tabelaDePessoas atualizada.
         IPessoaDao pessoaDao = new PessoaDao();
         DefaultTableModel tableModel = (DefaultTableModel) TabelaPessoa.getModel();
 
@@ -38,10 +38,10 @@ public class PessoaTela extends javax.swing.JFrame {
         // Limpar dados existentes na tabela
         tableModel.setRowCount(0);
 
-        // Obter lista de marcas do banco de dados
+        // Obter lista de Pessoas do banco de dados
         List<PessoaModelo> pessoas = pessoaDao.listarPessoa();
 
-        // Preencher tabela com os dados das marcas
+        // Preencher tabela com os dados das Pessoas
         for (PessoaModelo pessoa : pessoas) {
             Object[] rowData = {pessoa.getId(), pessoa.getNome(), pessoa.getImagemBytes()};
             tableModel.addRow(rowData);
@@ -275,7 +275,7 @@ public class PessoaTela extends javax.swing.JFrame {
 
     private void Btn_SalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_SalvarActionPerformed
          if(!Txt_Nome.getText().equals("")){
-            String nomePessoa = Txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomeMarca seja o campo de entrada para o nome da marca
+            String nomePessoa = Txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomePessoa seja o campo de entrada para o nome da Pessoa
             IPessoaDao pessoaDao = new PessoaDao();
             IPessoaControle pessoaControle = new PessoaControle(pessoaDao, (DefaultTableModel) TabelaPessoa.getModel());
             pessoaControle.adicionarPessoa(nomePessoa,imagemBytes);
@@ -309,13 +309,13 @@ public class PessoaTela extends javax.swing.JFrame {
 
     private void Btn_AlterarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_Btn_AlterarActionPerformed
          if(!Txt_Nome.getText().equals("")){
-            String nomePessoa = Txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomeMarca seja o campo de entrada para o nome da marca
+            String nomePessoa = Txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomePessoa seja o campo de entrada para o nome da Pessoa
             
             int selectedRow = TabelaPessoa.getSelectedRow();
                 if (selectedRow != -1) {
-                    int idMarca = (int) TabelaPessoa.getValueAt(selectedRow, 0);
+                    int idPessoa = (int) TabelaPessoa.getValueAt(selectedRow, 0);
                     IPessoaControle atualiza = new PessoaControle(new PessoaDao(), (DefaultTableModel) TabelaPessoa.getModel());
-                    atualiza.atualizarPessoa(idMarca, nomePessoa);
+                    atualiza.atualizarPessoa(idPessoa, nomePessoa);
                 }
         }        
         else{
@@ -327,9 +327,9 @@ public class PessoaTela extends javax.swing.JFrame {
          if(!Txt_Nome.getText().equals("")){
             int selectedRow = TabelaPessoa.getSelectedRow();
                 if (selectedRow != -1) {
-                    int idMarca = (int) TabelaPessoa.getValueAt(selectedRow, 0);
+                    int idPessoa = (int) TabelaPessoa.getValueAt(selectedRow, 0);
                     IPessoaControle atualiza = new PessoaControle(new PessoaDao(), (DefaultTableModel) TabelaPessoa.getModel());
-                    atualiza.removerPessoa(idMarca);}}        
+                    atualiza.removerPessoa(idPessoa);}}
         else{
             JOptionPane.showMessageDialog(null, "Campos vazios !");}
     }//GEN-LAST:event_Btn_ExcluirActionPerformed

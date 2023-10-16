@@ -4,13 +4,10 @@
  */
 package PessoaControle;
 
-import PessoaControle.IPessoaControle;
 import PessoaModelo.PessoaModelo;
 import PessoaPersistencia.IPessoaDao;
-import PessoaPersistencia.PessoaDao;
-import TelaPessoa.PessoaTela;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 
@@ -24,10 +21,10 @@ public class PessoaControle implements IPessoaControle {
 
     public void adicionarPessoa(String nome, byte[] imagemBytes) {
         PessoaModelo pessoa = pessoaDao.adicionarPessoa(nome,imagemBytes);
-        if (pessoa != null) {
-            tableModel.addRow(new Object[]{pessoa.getId(), pessoa.getNome(), pessoa.getImagemBytes()});}
-        else {
-            JOptionPane.showMessageDialog(null, "Erro ao adicionar Pessoa");}}
+            if (pessoa != null) {
+                tableModel.addRow(new Object[]{pessoa.getId(), pessoa.getNome(), pessoa.getImagemBytes()});}
+            else {
+                JOptionPane.showMessageDialog(null, "Erro ao adicionar Pessoa");}}
 
     public void atualizarPessoa(int id, String novoNome) {
         if (pessoaDao.atualizarPessoa(id, novoNome)) {
@@ -45,12 +42,12 @@ public class PessoaControle implements IPessoaControle {
         else {
             JOptionPane.showMessageDialog(null, "Erro ao remover Pessoa");}}
     
-    public PessoaModelo buscarPessoa(String nome, byte[] imagemBytes) {
+    public PessoaModelo buscarPessoa(String nome) {
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             String rowNome = (String) tableModel.getValueAt(i, 1);
                 if (rowNome.equals(nome)) {
                     int id = (int) tableModel.getValueAt(i, 0);
-                    String url = (String) tableModel.getValueAt(i, 2);
+                    byte[] imagemBytes = (byte[]) tableModel.getValueAt(i, 2);
                     return new PessoaModelo(id, nome, imagemBytes);}}
     return null;}
 

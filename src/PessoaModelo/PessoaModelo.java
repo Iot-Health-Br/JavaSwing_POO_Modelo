@@ -4,11 +4,6 @@
  */
 package PessoaModelo;
 
-import PessoaControle.IPessoaControle;
-import PessoaPersistencia.IPessoaDao;
-import PessoaPersistencia.PessoaDao;
-import TelaPessoa.PessoaTela;
-
 import java.util.Arrays;
 
 /**
@@ -26,23 +21,17 @@ public class PessoaModelo {
         this.imagemBytes = imagemBytes;
     }
     public int getId() {
-        return id;
-    }
+        return id;}
     public void setId(int id) {
-        this.id = id;
-    }
+        this.id = id;}
     public String getNome() {
-        return nome;
-    }
+        return nome;}
     public void setNome(String nome) {
-        this.nome = nome;
-    }
+        this.nome = nome;}
     public byte[] getImagemBytes() {
-        return imagemBytes;
-    }
+        return imagemBytes;}
     public void setImagemBytes(byte[] imagemBytes) {
-        this.imagemBytes = imagemBytes;
-    }
+        this.imagemBytes = imagemBytes;}
 
     // Verificar a real nescessidade do tostring
     @Override

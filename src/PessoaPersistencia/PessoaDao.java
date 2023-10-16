@@ -5,20 +5,12 @@
 package PessoaPersistencia;
 
 import ConexaoBancoDeDados.DatabaseConnection;
-import PessoaControle.IPessoaControle;
 import PessoaModelo.PessoaModelo;
-import PessoaPersistencia.IPessoaDao;
-import PessoaPersistencia.PessoaDao;
-import TelaPessoa.PessoaTela;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import javax.swing.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 
 public class PessoaDao implements IPessoaDao {
@@ -26,6 +18,7 @@ public class PessoaDao implements IPessoaDao {
     private static final String COLUNA_ID = "id";
     private static final String COLUNA_NOME = "nome";
     private static final String COLUNA_FOTO = "foto";
+
     public PessoaDao() {
         criarTabela();
     }
@@ -45,23 +38,38 @@ public class PessoaDao implements IPessoaDao {
     public PessoaModelo adicionarPessoa(String nome, byte[] imagemBytes) {
         
         try (Connection conexao = DatabaseConnection.getConnection();
-            // Verificar se a PESSOA já está cadastrada
-            PreparedStatement verificacaoStatement = conexao.prepareStatement(
-            String.format("SELECT * FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME ));
-                 
-            // Inserir a PESSOA no banco de dados
+
+            // Verifica se a PESSOA já está cadastrada
+             PreparedStatement verificacaoStatement = conexao.prepareStatement(
+                    String.format("SELECT * FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME));
+
+            // Verifica se a FOTO DA PESSOA já está cadastrada
+             PreparedStatement verificacaoStatementFoto = conexao.prepareStatement(
+                     String.format("SELECT * FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_FOTO));
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+             // Inserir a PESSOA no banco de dados
             PreparedStatement insercaoStatement = conexao.prepareStatement(
             String.format("INSERT INTO %s (%s,%s) VALUES (?,?) ", TABELA_PESSOAS, COLUNA_NOME, COLUNA_FOTO),
             Statement.RETURN_GENERATED_KEYS)) {
 
-            // Verificar se a PESSOA já está cadastrada
-            verificacaoStatement.setString(1, nome);
-            ResultSet resultSet = verificacaoStatement.executeQuery();
-            
+
+                // Verificar se a (PESSOA) já está cadastrada
+                verificacaoStatement.setString(1, nome);
+                ResultSet resultSet = verificacaoStatement.executeQuery();
+
                 if (resultSet.next()) {
-                    JOptionPane.showMessageDialog(null, "A PESSOA já está cadastrada.");
+                    JOptionPane.showMessageDialog(null, "A pessoa já está cadastrada.");
                     return null;}
-        
+
+                // Verificar se a (FOTO DA PESSOA) já está cadastrada
+                verificacaoStatementFoto.setBytes(1, imagemBytes);
+                ResultSet resultSetFoto = verificacaoStatementFoto.executeQuery();
+
+                if (resultSetFoto.next()) {
+                    JOptionPane.showMessageDialog(null, "A foto da pessoa já está cadastrada.");
+                    return null;}
+
                 // Inserir a PESSOA no banco de dados
                 insercaoStatement.setString(1, nome );
                 insercaoStatement.setBytes(2, imagemBytes );
@@ -70,12 +78,12 @@ public class PessoaDao implements IPessoaDao {
                 if (rowsAffected == 0) {
                     return null;}
 
-            try (ResultSet generatedKeys = insercaoStatement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int id = generatedKeys.getInt(1);
-                    return new PessoaModelo(id, nome, imagemBytes);}
-                else {
-                    return null;}}
+                try (ResultSet generatedKeys = insercaoStatement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int id = generatedKeys.getInt(1);
+                        return new PessoaModelo(id, nome, imagemBytes);}
+                    else {
+                        return null;}}
         } 
         catch (SQLException e) {
               e.printStackTrace();
@@ -103,10 +111,10 @@ public class PessoaDao implements IPessoaDao {
              String.format("DELETE FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_ID))) {
                 statement.setInt(1, id);
                 int rowsAffected = statement.executeUpdate();
-            return rowsAffected > 0;} 
+            return rowsAffected > 0;}
         
         catch (SQLException e) {
-            e.printStackTrace();
+               e.printStackTrace();
             return false;}
     }
 
@@ -115,52 +123,45 @@ public class PessoaDao implements IPessoaDao {
 
         try (Connection conexao = DatabaseConnection.getConnection();
              Statement statement = conexao.createStatement()) {
-            String query = String.format("SELECT * FROM %s", TABELA_PESSOAS);
-            ResultSet resultSet = statement.executeQuery(query);
+                String query = String.format("SELECT * FROM %s", TABELA_PESSOAS);
+                ResultSet resultSet = statement.executeQuery(query);
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt(COLUNA_ID);
-                String nome = resultSet.getString(COLUNA_NOME);
-                byte[] imagemBytes = resultSet.getBytes(COLUNA_FOTO);
-                PessoaModelo marca = new PessoaModelo(id, nome, imagemBytes);
-                pessoas.add(marca);}
+                while (resultSet.next()) {
+                       int id = resultSet.getInt(COLUNA_ID);
+                       String nome = resultSet.getString(COLUNA_NOME);
+                       byte[] imagemBytes = resultSet.getBytes(COLUNA_FOTO);
+                       PessoaModelo pessoa = new PessoaModelo(id, nome, imagemBytes);
+                       pessoas.add(pessoa);}
             
-        resultSet.close();}
-        
+            resultSet.close();}
         catch (SQLException e) {
             e.printStackTrace();}
-            return pessoas;}
+
+    return pessoas;}
     
         public List<String> obterTodasPessoas() {
-        List<String> pessoas = new ArrayList<>();
-        try (Connection conexao = DatabaseConnection.getConnection();
-             Statement statement = conexao.createStatement();
-             ResultSet resultSet = statement.executeQuery(String.format("SELECT %s FROM %s", COLUNA_NOME, TABELA_PESSOAS))) {
-            while (resultSet.next()) {
-                String marca = resultSet.getString(COLUNA_NOME);
-                pessoas.add(marca);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return pessoas;
-    }
+            List<String> pessoas = new ArrayList<>();
+                try (Connection conexao = DatabaseConnection.getConnection();
+                     Statement statement = conexao.createStatement();
+                     ResultSet resultSet = statement.executeQuery(String.format("SELECT %s FROM %s", COLUNA_NOME, TABELA_PESSOAS))) {
+                        while (resultSet.next()) {
+                               String pessoa = resultSet.getString(COLUNA_NOME);
+                               pessoas.add(pessoa);}}
+                catch (SQLException e) {
+                      e.printStackTrace();}
+        return pessoas;}
    
 
     public int obterIdPessoaPeloIndice(int indice) {
         int id = -1;
-        try (Connection conexao = DatabaseConnection.getConnection();
-             PreparedStatement statement = conexao.prepareStatement(
-                     String.format("SELECT %s FROM %s LIMIT 1 OFFSET ?", COLUNA_ID, TABELA_PESSOAS))) {
-            statement.setInt(1, indice);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    id = resultSet.getInt(COLUNA_ID);
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return id;
-    }  
+            try (Connection conexao = DatabaseConnection.getConnection();
+                 PreparedStatement statement = conexao.prepareStatement(
+                 String.format("SELECT %s FROM %s LIMIT 1 OFFSET ?", COLUNA_ID, TABELA_PESSOAS))){
+                    statement.setInt(1, indice);
+                    try (ResultSet resultSet = statement.executeQuery()) {
+                        if (resultSet.next()) {
+                            id = resultSet.getInt(COLUNA_ID);}}}
+            catch (SQLException e) {
+                  e.printStackTrace();}
+    return id;}
 }
