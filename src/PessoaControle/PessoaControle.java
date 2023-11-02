@@ -6,6 +6,7 @@ package PessoaControle;
 
 import PessoaModelo.PessoaModelo;
 import PessoaPersistencia.IPessoaDao;
+import PessoaPersistencia.PessoaDao;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -14,10 +15,15 @@ import javax.swing.table.DefaultTableModel;
 public class PessoaControle implements IPessoaControle {
     private IPessoaDao pessoaDao;
     private DefaultTableModel tableModel;
+    private IPessoaDao dao = new PessoaDao();
 
     public PessoaControle(IPessoaDao pessoaDao, DefaultTableModel tableModel) {
         this.pessoaDao = pessoaDao;
         this.tableModel = tableModel;}
+
+    public PessoaModelo buscarPorNome(String nome) {
+        return dao.buscarPorNome(nome);
+    }
 
     public void adicionarPessoa(String nome, byte[] imagemBytes) {
         PessoaModelo pessoa = pessoaDao.adicionarPessoa(nome,imagemBytes);
@@ -41,14 +47,14 @@ public class PessoaControle implements IPessoaControle {
                     tableModel.removeRow(rowIndex);}} 
         else {
             JOptionPane.showMessageDialog(null, "Erro ao remover Pessoa");}}
-    
+
     public PessoaModelo buscarPessoa(String nome) {
         for (int i = 0; i < tableModel.getRowCount(); i++) {
             String rowNome = (String) tableModel.getValueAt(i, 1);
                 if (rowNome.equals(nome)) {
                     int id = (int) tableModel.getValueAt(i, 0);
-                    byte[] imagemBytes = (byte[]) tableModel.getValueAt(i, 2);
-                    return new PessoaModelo(id, nome, imagemBytes);}}
+                    byte[] imagem = (byte[]) tableModel.getValueAt(i, 2);
+                    return new PessoaModelo(id, nome, imagem);}}
     return null;}
 
     private int getRowIndexById(int id) {
@@ -57,4 +63,5 @@ public class PessoaControle implements IPessoaControle {
                 if (rowId == id) {
                 return i;}}
     return -1;}
+
 }

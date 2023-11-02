@@ -18,6 +18,8 @@ public interface IPessoaDao {
 
     List<PessoaModelo> listarPessoa();
 
+    PessoaModelo buscarPorNome(String nome);
+
     List<String> obterTodasPessoas();
 
     int obterIdPessoaPeloIndice(int indice);

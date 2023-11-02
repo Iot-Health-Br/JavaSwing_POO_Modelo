@@ -138,6 +138,20 @@ public class PessoaDao implements IPessoaDao {
             e.printStackTrace();}
 
     return pessoas;}
+
+    public PessoaModelo buscarPorNome(String nome) {
+        try (Connection conexao = DatabaseConnection.getConnection();
+             PreparedStatement statement = conexao.prepareStatement(String.format("SELECT %s, %s, %s FROM %s WHERE %s = ?", COLUNA_NOME, COLUNA_FOTO, COLUNA_ID ,TABELA_PESSOAS, COLUNA_NOME))) {
+            statement.setString(1, nome);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    // Usando o novo construtor aqui
+                    PessoaModelo pessoa = new PessoaModelo(resultSet.getInt("id"),resultSet.getString("nome"), resultSet.getBytes("foto"));
+                    return pessoa;}}}
+        catch (SQLException e) {
+            e.printStackTrace();}
+        return null;
+    }
     
         public List<String> obterTodasPessoas() {
             List<String> pessoas = new ArrayList<>();
