@@ -32,8 +32,8 @@ public class PessoaControle implements IPessoaControle {
             else {
                 JOptionPane.showMessageDialog(null, "Erro ao adicionar Pessoa");}}
 
-    public void atualizarPessoa(int id, String novoNome) {
-        if (pessoaDao.atualizarPessoa(id, novoNome)) {
+    public void atualizarPessoa(int id, String novoNome, byte[] novaFoto) {
+        if (pessoaDao.atualizarPessoa(id, novoNome, novaFoto)) {
             int rowIndex = getRowIndexById(id);
                 if (rowIndex != -1) {
                     tableModel.setValueAt(novoNome, rowIndex, 1);}} 

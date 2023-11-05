@@ -12,7 +12,7 @@ public interface IPessoaDao {
 
     PessoaModelo adicionarPessoa(String nome, byte[] imagemBytes);
 
-    boolean atualizarPessoa(int id, String novoNome);
+    boolean atualizarPessoa(int id, String novoNome, byte[] novaFoto);
 
     boolean removerPessoa(int id);
 

@@ -6,6 +6,7 @@ import PessoaPersistencia.PessoaDao;
 import PessoaControle.PessoaControle;
 import PessoaControle.IPessoaControle;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -16,6 +17,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
@@ -26,17 +29,24 @@ public class TelaPessoa {
     private JTextField txt_Nome;
     private JButton excluirButton;
     private JButton btn_Alterar;
-    private JLabel Panel_Logo;
+    private JLabel JLabelLogo;
     private JTable tabelaPessoas;
     private JButton btn_Add;
+    private JPanel JPanelLogo;
+    private JPanel JPanelOpção;
+    private JPanel JPanelTabela;
     byte[] imagemBytes = null;
 
+    int indice=0;
+
+    // Injeção de Dependencia do código.
     IPessoaDao pessoaDao = new PessoaDao();
+    DefaultTableModel tableModel = (DefaultTableModel) tabelaPessoas.getModel();
 
     public TelaPessoa() {
 
         CriarTabela();
-        fieldLogo();
+        atualizaForm();
         txt_Nome.setText("");
 
         btn_Add.addActionListener(new ActionListener() {
@@ -49,7 +59,6 @@ public class TelaPessoa {
                     fc.setCurrentDirectory(new File("./src/PessoasFotos"));
 
                     // Abre a janela do diretorio do arquivo
-                    //fc.showOpenDialog(this);
                     fc.showOpenDialog(null);
                     // Salva o arquivo selecionado em um arquivo novo
                     File arquivo = fc.getSelectedFile();
@@ -60,16 +69,13 @@ public class TelaPessoa {
 
                     // Salva o Caminho do diretorio
                     String nomeDoArquivo = arquivo.getPath();
-
                     ImageIcon iconLogo = new ImageIcon(nomeDoArquivo);
+                    JLabelLogo.setSize(100, 100);
                     iconLogo.setImage(iconLogo.getImage().getScaledInstance(
-                            Panel_Logo.getWidth(),Panel_Logo.getHeight(),1));
-                    Panel_Logo.setSize(300, 400);
-                    Panel_Logo.setIcon(iconLogo);
-                }
+                            JLabelLogo.getWidth(), JLabelLogo.getHeight(),1));
+                    JLabelLogo.setIcon(iconLogo);}
                 catch (Exception erro) {
-                    JOptionPane.showMessageDialog(null, erro);
-                }
+                    JOptionPane.showMessageDialog(null, erro);}
             }
         });
         btn_Salvar.addActionListener(new ActionListener() {
@@ -88,13 +94,49 @@ public class TelaPessoa {
         btn_Alterar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Captura a imagem do JLabel
+                ImageIcon icon = (ImageIcon) JLabelLogo.getIcon();
+                BufferedImage bufferedImage = new BufferedImage(
+                        icon.getIconWidth(),
+                        icon.getIconHeight(),
+                        BufferedImage.TYPE_INT_ARGB);
+                icon.paintIcon(null, bufferedImage.getGraphics(), 0, 0);
 
+                // Escreve a BufferedImage em um ByteArrayOutputStream
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                try {
+                    ImageIO.write(bufferedImage, "png", baos);}
+                catch (Exception erro) {
+                    JOptionPane.showMessageDialog(null, erro);}
+                // Converte o ByteArrayOutputStream em um array de bytes
+                imagemBytes = baos.toByteArray();
+
+                if(!txt_Nome.getText().equals("")){
+                    String nomePessoa = txt_Nome.getText().toUpperCase(); // Supondo que jTextFieldNomePessoa seja o campo de entrada para o nome da Pessoa
+                    int selectedRow = tabelaPessoas.getSelectedRow();
+                    if (selectedRow != -1) {
+                        int idNome = (int) tabelaPessoas.getValueAt(selectedRow, 0);
+                        IPessoaControle pessoaControle = new PessoaControle(pessoaDao, (DefaultTableModel) tabelaPessoas.getModel());
+                        pessoaControle.atualizarPessoa(idNome,nomePessoa,imagemBytes);}
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Campos vazios !");}
             }
         });
         excluirButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                if(!txt_Nome.getText().equals("")){
+                    int selectedRow = tabelaPessoas.getSelectedRow();
+                    if (selectedRow != -1) {
+                        int idNome = (int) tabelaPessoas.getValueAt(selectedRow, 0);
+                        IPessoaControle pessoaControle = new PessoaControle(pessoaDao, (DefaultTableModel) tabelaPessoas.getModel());
+                        pessoaControle.removerPessoa(idNome);
+                        txt_Nome.setText("");
+                        JLabelLogo.setIcon(null);}
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Campos vazios !");}
             }
         });
         tabelaPessoas.addMouseListener(new MouseAdapter() {
@@ -106,18 +148,23 @@ public class TelaPessoa {
                 if (selectedRow != -1) {
                     String pessoaSelecionada = (String) tabelaPessoas.getValueAt(selectedRow, 1);
                     txt_Nome.setText(pessoaSelecionada);}
+
                 String nome = txt_Nome.getText().toUpperCase();
 
-                IPessoaDao pessoaDao = new PessoaDao();
-                DefaultTableModel tableModel = (DefaultTableModel) tabelaPessoas.getModel();
                 PessoaControle controle = new PessoaControle(pessoaDao, tableModel);
 
                 PessoaModelo foto = controle.buscarPorNome(nome);
 
                 if (foto != null) {
                     ImageIcon image = new ImageIcon(foto.getImagemBytes());
-                    Panel_Logo.setIcon(image);
-                    Panel_Logo.setSize(300, 400);}
+                    // Carregar a imagem
+                    Image imag = image.getImage();
+                    // Redimensionar a imagem para se ajustar ao tamanho do JLabel
+                    Image scaledImage = imag.getScaledInstance(JLabelLogo.getWidth(), JLabelLogo.getHeight(), Image.SCALE_SMOOTH);
+                    ImageIcon scaledIcon = new ImageIcon(scaledImage);
+                    // Definir o ícone do JLabel
+                    JLabelLogo.setIcon(scaledIcon);
+                }
                 else {
                     JOptionPane.showMessageDialog(null, "Pessoa não encontrada!");}
             }
@@ -147,11 +194,23 @@ public class TelaPessoa {
             tableModel.addRow(rowData);}
     }
 
-    public void fieldLogo(){
-        Panel_Logo.setMinimumSize(new Dimension(300,300));
-        Panel_Logo.setHorizontalAlignment(JLabel.CENTER);
-        TitledBorder border = BorderFactory.createTitledBorder("Título da Borda");
-        Panel_Logo.setBorder(border);
+    public void atualizaForm(){
+        TitledBorder border = BorderFactory.createTitledBorder("Foto");
+        JPanelLogo.setBorder(border);
+        JPanelLogo.setPreferredSize(new Dimension(50, 50));
+        JPanelLogo.setLayout(new GridBagLayout()); // Define o layout para GridBagLayout
+
+        JLabelLogo.setPreferredSize(new Dimension(100, 100));
+        JLabelLogo.setHorizontalAlignment(SwingConstants.CENTER); // Centraliza horizontalmente
+        JLabelLogo.setVerticalAlignment(SwingConstants.CENTER); // Centraliza verticalmente
+
+        TitledBorder borderOp = BorderFactory.createTitledBorder("Opções");
+        JPanelOpção.setBorder(borderOp);
+        JPanelOpção.setPreferredSize(new Dimension(50, 50));
+
+        TitledBorder Tabela = BorderFactory.createTitledBorder("Tabela");
+        JPanelTabela.setBorder(Tabela);
+        JPanelTabela.setPreferredSize(new Dimension(50, 50));
     }
 
     public static void main(String[] args) {

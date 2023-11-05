@@ -90,15 +90,15 @@ public class PessoaDao implements IPessoaDao {
               return null;}
     }
 
-    public boolean atualizarPessoa(int id, String novoNome) {
+    public boolean atualizarPessoa(int id, String novoNome, byte[] novaFoto) {
         try (Connection conexao = DatabaseConnection.getConnection();
              PreparedStatement statement = conexao.prepareStatement(
-                 String.format("UPDATE %s SET %s = ? WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME, COLUNA_ID))) {
+                 String.format("UPDATE %s SET %s = ?,%s = ? WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME, COLUNA_FOTO, COLUNA_ID))) {
                     statement.setString(1, novoNome);
-                    statement.setInt(2, id);
+                    statement.setInt(3, id);//2
+                    statement.setBytes(2, novaFoto);
                     int rowsAffected = statement.executeUpdate();
                     return rowsAffected > 0;}
-    
         catch (SQLException e) {
                e.printStackTrace();
                return false;}

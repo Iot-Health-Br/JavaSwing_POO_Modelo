@@ -13,7 +13,7 @@ public interface IPessoaControle {
         void adicionarPessoa(String nome, byte[] imagemBytes);
 
     //Metodo Atualizar Pessoa
-        void atualizarPessoa(int id, String novoNome);
+        void atualizarPessoa(int id, String novoNome, byte[] novaFoto);
 
     //Metodo Remover Pessoa, faz a pesquisa pelo id
         void removerPessoa(int id);
