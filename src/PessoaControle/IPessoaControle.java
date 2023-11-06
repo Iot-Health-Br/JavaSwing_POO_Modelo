@@ -18,7 +18,7 @@ public interface IPessoaControle {
     //Metodo Remover Pessoa, faz a pesquisa pelo id
         void removerPessoa(int id);
 
-        PessoaModelo buscarPorNome(String nome);
+        PessoaModelo buscarPorNome(int idNome);
 
     //Metodo Buscar Pessoa, faz a busca pela String Nome
         PessoaModelo buscarPessoa(String nome);

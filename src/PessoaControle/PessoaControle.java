@@ -21,8 +21,8 @@ public class PessoaControle implements IPessoaControle {
         this.pessoaDao = pessoaDao;
         this.tableModel = tableModel;}
 
-    public PessoaModelo buscarPorNome(String nome) {
-        return dao.buscarPorNome(nome);
+    public PessoaModelo buscarPorNome(int idNome) {
+        return dao.buscarPorNome(idNome);
     }
 
     public void adicionarPessoa(String nome, byte[] imagemBytes) {

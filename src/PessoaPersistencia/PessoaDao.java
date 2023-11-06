@@ -92,11 +92,38 @@ public class PessoaDao implements IPessoaDao {
 
     public boolean atualizarPessoa(int id, String novoNome, byte[] novaFoto) {
         try (Connection conexao = DatabaseConnection.getConnection();
+
+             // Verifica se a PESSOA já está cadastrada
+             PreparedStatement verificacaoStatement = conexao.prepareStatement(
+                     String.format("SELECT * FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME));
+
+             // Verifica se a FOTO DA PESSOA já está cadastrada
+             PreparedStatement verificacaoStatementFoto = conexao.prepareStatement(
+                     String.format("SELECT * FROM %s WHERE %s = ?", TABELA_PESSOAS, COLUNA_FOTO));
+
              PreparedStatement statement = conexao.prepareStatement(
                  String.format("UPDATE %s SET %s = ?,%s = ? WHERE %s = ?", TABELA_PESSOAS, COLUNA_NOME, COLUNA_FOTO, COLUNA_ID))) {
+
+            // Verificar se a (PESSOA) já está cadastrada
+            verificacaoStatement.setString(1, novoNome);
+            ResultSet resultSet = verificacaoStatement.executeQuery();
+
+            if (resultSet.next()) {
+                JOptionPane.showMessageDialog(null, "A pessoa já está cadastrada.");
+                return false;}
+
+            // Verificar se a (FOTO DA PESSOA) já está cadastrada
+            verificacaoStatementFoto.setBytes(1, novaFoto);
+            ResultSet resultSetFoto = verificacaoStatementFoto.executeQuery();
+
+            if (resultSetFoto.next()) {
+                JOptionPane.showMessageDialog(null, "A foto da pessoa já está cadastrada.");
+                return false;}
+
+            // Insere no banco os dados.
                     statement.setString(1, novoNome);
-                    statement.setInt(3, id);//2
                     statement.setBytes(2, novaFoto);
+                    statement.setInt(3, id);//2
                     int rowsAffected = statement.executeUpdate();
                     return rowsAffected > 0;}
         catch (SQLException e) {
@@ -123,8 +150,9 @@ public class PessoaDao implements IPessoaDao {
 
         try (Connection conexao = DatabaseConnection.getConnection();
              Statement statement = conexao.createStatement()) {
-                String query = String.format("SELECT * FROM %s", TABELA_PESSOAS);
-                ResultSet resultSet = statement.executeQuery(query);
+                String query = String.format("SELECT * FROM %s ORDER BY id ASC", TABELA_PESSOAS);
+
+            ResultSet resultSet = statement.executeQuery(query);
 
                 while (resultSet.next()) {
                        int id = resultSet.getInt(COLUNA_ID);
@@ -139,10 +167,10 @@ public class PessoaDao implements IPessoaDao {
 
     return pessoas;}
 
-    public PessoaModelo buscarPorNome(String nome) {
+    public PessoaModelo buscarPorNome(int idNome) {
         try (Connection conexao = DatabaseConnection.getConnection();
-             PreparedStatement statement = conexao.prepareStatement(String.format("SELECT %s, %s, %s FROM %s WHERE %s = ?", COLUNA_NOME, COLUNA_FOTO, COLUNA_ID ,TABELA_PESSOAS, COLUNA_NOME))) {
-            statement.setString(1, nome);
+             PreparedStatement statement = conexao.prepareStatement(String.format("SELECT %s, %s, %s FROM %s WHERE %s = ?", COLUNA_ID, COLUNA_NOME, COLUNA_FOTO ,TABELA_PESSOAS, COLUNA_ID))) {
+            statement.setInt(1, idNome);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
                     // Usando o novo construtor aqui

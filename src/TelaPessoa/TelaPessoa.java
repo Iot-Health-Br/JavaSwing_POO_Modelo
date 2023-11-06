@@ -35,6 +35,8 @@ public class TelaPessoa {
     private JPanel JPanelLogo;
     private JPanel JPanelOpção;
     private JPanel JPanelTabela;
+    private JButton btn_Novo;
+    private JButton btn_Buscar;
     byte[] imagemBytes = null;
 
     int indice=0;
@@ -47,7 +49,6 @@ public class TelaPessoa {
 
         CriarTabela();
         atualizaForm();
-        txt_Nome.setText("");
 
         btn_Add.addActionListener(new ActionListener() {
             @Override
@@ -145,28 +146,43 @@ public class TelaPessoa {
                 super.mouseClicked(e);
 
                 int selectedRow = tabelaPessoas.getSelectedRow();
+                int idNome = 0;
                 if (selectedRow != -1) {
+                    idNome = (int) tabelaPessoas.getValueAt(selectedRow, 0);
                     String pessoaSelecionada = (String) tabelaPessoas.getValueAt(selectedRow, 1);
-                    txt_Nome.setText(pessoaSelecionada);}
-
-                String nome = txt_Nome.getText().toUpperCase();
+                    txt_Nome.setText(pessoaSelecionada);
+                }
 
                 PessoaControle controle = new PessoaControle(pessoaDao, tableModel);
 
-                PessoaModelo foto = controle.buscarPorNome(nome);
+                PessoaModelo foto = controle.buscarPorNome(idNome);
 
                 if (foto != null) {
                     ImageIcon image = new ImageIcon(foto.getImagemBytes());
                     // Carregar a imagem
                     Image imag = image.getImage();
-                    // Redimensionar a imagem para se ajustar ao tamanho do JLabel
                     Image scaledImage = imag.getScaledInstance(JLabelLogo.getWidth(), JLabelLogo.getHeight(), Image.SCALE_SMOOTH);
                     ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
                     // Definir o ícone do JLabel
                     JLabelLogo.setIcon(scaledIcon);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Pessoa não encontrada!");
                 }
-                else {
-                    JOptionPane.showMessageDialog(null, "Pessoa não encontrada!");}
+            }
+        });
+        btn_Novo.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                txt_Nome.setText("");
+                tabelaPessoas.clearSelection();
+                JLabelLogo.setIcon(null);
+            }
+        });
+        btn_Buscar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
             }
         });
     }
@@ -195,9 +211,10 @@ public class TelaPessoa {
     }
 
     public void atualizaForm(){
+        txt_Nome.setText("");
         TitledBorder border = BorderFactory.createTitledBorder("Foto");
         JPanelLogo.setBorder(border);
-        JPanelLogo.setPreferredSize(new Dimension(50, 50));
+        JPanelLogo.setPreferredSize(new Dimension(100, 100));
         JPanelLogo.setLayout(new GridBagLayout()); // Define o layout para GridBagLayout
 
         JLabelLogo.setPreferredSize(new Dimension(100, 100));

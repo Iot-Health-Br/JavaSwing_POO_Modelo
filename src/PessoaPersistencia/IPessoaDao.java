@@ -18,7 +18,7 @@ public interface IPessoaDao {
 
     List<PessoaModelo> listarPessoa();
 
-    PessoaModelo buscarPorNome(String nome);
+    PessoaModelo buscarPorNome(int idNome);
 
     List<String> obterTodasPessoas();
 
